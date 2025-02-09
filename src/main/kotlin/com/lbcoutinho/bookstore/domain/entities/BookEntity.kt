@@ -1,11 +1,11 @@
-package com.lbcoutinho.bookstore.domain
+package com.lbcoutinho.bookstore.domain.entities
 
 import jakarta.persistence.*
 import jakarta.persistence.CascadeType.DETACH
 
 @Entity
 @Table(name = "books")
-data class Book(
+data class BookEntity(
     @Id
     val isbn: String,
     val title: String,
@@ -13,6 +13,5 @@ data class Book(
     val image: String,
     @ManyToOne(cascade = [DETACH])
     @JoinColumn(name = "author_id")
-    val author: Author
-) {
-}
+    val author: AuthorEntity
+)
