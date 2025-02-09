@@ -2,8 +2,8 @@ package com.lbcoutinho.bookstore.domain.dto
 
 data class AuthorDto(
     val id: Long?,
-    val name: String,
+    val name: String = "",
     val age: Int,
-    val description: String,
-    val image: String
+    val description: String = "",
+    val image: String = ""
 )

@@ -18,4 +18,9 @@ class AuthorsController(private val authorService: AuthorService) {
             author.toAuthorEntity()
         ).toAuthorDto()
     }
+
+    @GetMapping
+    fun getAllAuthors(): List<AuthorDto> {
+        return authorService.getAll().map { it.toAuthorDto() }
+    }
 }
