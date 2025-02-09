@@ -30,4 +30,26 @@ class AuthorServiceImplTest @Autowired constructor(
 
         assertThat(queriedAuthor).isEqualTo(anAuthorEntity(savedAuthor.id))
     }
+
+    @Test
+    fun `Should return empty list given there are NO authors saved on the database`() {
+        // When
+        val authorsList = authorService.getAll()
+
+        // Then
+        assertThat(authorsList).isEmpty()
+    }
+
+    @Test
+    fun `Should return authors list given there are authors saved on the database`() {
+        // Given
+        val savedAuthor = authorRepository.save(anAuthorEntity())
+        val expectedList = listOf(savedAuthor)
+
+        // When
+        val authorsList = authorService.getAll()
+
+        // Then
+        assertThat(authorsList).isEqualTo(expectedList)
+    }
 }
