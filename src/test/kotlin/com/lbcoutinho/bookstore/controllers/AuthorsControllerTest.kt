@@ -25,7 +25,7 @@ class AuthorsControllerTest @Autowired constructor(
     private val objectMapper = ObjectMapper()
 
     @Test
-    fun `should create Author then return HTTP 201 status on successful create`() {
+    fun `Should create Author then return HTTP 201 status on successful create`() {
         // Given
         every { authorService.save(any()) }.answers { firstArg() }
         val expectedEntity = AuthorEntity(
