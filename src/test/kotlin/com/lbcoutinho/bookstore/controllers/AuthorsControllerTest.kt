@@ -87,4 +87,40 @@ class AuthorsControllerTest @Autowired constructor(
         // Then
         verify { authorService.getAll() }
     }
+
+    @Test
+    fun `Should return HTTP 404 given author NOT found on the database`() {
+        // Given
+        val id = 1L;
+        every { authorService.getById(id) }.returns(null)
+
+        // When
+        mockMvc.get("$AUTHORS_BASE_URL/$id") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isNotFound() }
+        }
+
+        // Then
+        verify { authorService.getById(id) }
+    }
+
+    @Test
+    fun `Should return HTTP 200 with author given author was found on the database`() {
+        // Given
+        val id = 1L;
+        val expectedAuthor = anAuthorEntity(id)
+        every { authorService.getById(id) }.returns(expectedAuthor)
+
+        // When
+        mockMvc.get("$AUTHORS_BASE_URL/$id") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { json(objectMapper.writeValueAsString(expectedAuthor)) }
+        }
+
+        // Then
+        verify { authorService.getById(id) }
+    }
 }

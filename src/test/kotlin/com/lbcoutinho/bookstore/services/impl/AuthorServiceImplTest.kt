@@ -3,6 +3,7 @@ package com.lbcoutinho.bookstore.services.impl
 import com.lbcoutinho.bookstore.repositories.AuthorRepository
 import com.lbcoutinho.bookstore.util.anAuthorEntity
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -13,6 +14,11 @@ class AuthorServiceImplTest @Autowired constructor(
     private val authorService: AuthorServiceImpl,
     private val authorRepository: AuthorRepository
 ) {
+
+    @BeforeEach
+    fun setup() {
+        authorRepository.deleteAll()
+    }
 
     @Test
     fun `Should save new author to the database`() {
@@ -51,5 +57,29 @@ class AuthorServiceImplTest @Autowired constructor(
 
         // Then
         assertThat(authorsList).isEqualTo(expectedList)
+    }
+
+    @Test
+    fun `Should return null given author NOT found on the database`() {
+        // Given
+        val id = 1L;
+
+        // When
+        val author = authorService.getById(id);
+
+        // Then
+        assertThat(author).isNull()
+    }
+
+    @Test
+    fun `Should return author entity given author found on the database`() {
+        // Given
+        val savedAuthor = authorRepository.save(anAuthorEntity())
+
+        // When
+        val author = authorService.getById(savedAuthor.id!!);
+
+        // Then
+        assertThat(author).isEqualTo(savedAuthor);
     }
 }
