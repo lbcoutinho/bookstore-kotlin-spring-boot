@@ -6,3 +6,8 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: root
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - 8888:8080
