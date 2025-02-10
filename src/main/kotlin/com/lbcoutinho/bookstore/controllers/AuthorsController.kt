@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -20,10 +21,14 @@ class AuthorsController(private val authorService: AuthorService) {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    fun createAuthor(@RequestBody author: AuthorDto): AuthorDto {
-        return authorService.save(
-            author.toAuthorEntity()
-        ).toAuthorDto()
+    fun createAuthor(@RequestBody authorDto: AuthorDto): ResponseEntity<AuthorDto> {
+        return try {
+            ResponseEntity.status(CREATED).body(authorService.create(
+                authorDto.toAuthorEntity()
+            ).toAuthorDto())
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().build()
+        }
     }
 
     @GetMapping
@@ -35,4 +40,17 @@ class AuthorsController(private val authorService: AuthorService) {
     fun getAuthor(@PathVariable("id") id: Long): ResponseEntity<AuthorDto> {
         return ResponseEntity.ofNullable(authorService.getById(id)?.toAuthorDto())
     }
+
+    @PutMapping("/{id}")
+    fun updateAuthor(@PathVariable("id") id: Long,
+                     @RequestBody authorDto: AuthorDto): ResponseEntity<AuthorDto> {
+        return try {
+            ResponseEntity.ok(authorService.fullUpdate(
+                id, authorDto.toAuthorEntity()
+            ).toAuthorDto())
+        } catch (e: IllegalStateException) {
+            ResponseEntity.notFound().build()
+        }
+    }
+
 }

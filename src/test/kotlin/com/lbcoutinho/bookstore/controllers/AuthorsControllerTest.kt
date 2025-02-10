@@ -3,6 +3,7 @@ package com.lbcoutinho.bookstore.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.lbcoutinho.bookstore.domain.entities.AuthorEntity
 import com.lbcoutinho.bookstore.services.AuthorService
+import com.lbcoutinho.bookstore.toAuthorEntity
 import com.lbcoutinho.bookstore.util.anAuthorDto
 import com.lbcoutinho.bookstore.util.anAuthorEntity
 import com.ninjasquad.springmockk.MockkBean
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 
 private const val AUTHORS_BASE_URL = "/v1/authors"
 
@@ -31,7 +33,7 @@ class AuthorsControllerTest @Autowired constructor(
     @Test
     fun `Should return HTTP 201 with persisted entity given Author created successfully`() {
         // Given
-        every { authorService.save(any()) }.answers { firstArg() }
+        every { authorService.create(any()) }.answers { firstArg() }
         val expectedEntity = AuthorEntity(
             id = null,
             name = "John Doe",
@@ -50,7 +52,22 @@ class AuthorsControllerTest @Autowired constructor(
         }
 
         // Then
-        verify { authorService.save(expectedEntity) }
+        verify { authorService.create(expectedEntity) }
+    }
+
+    @Test
+    fun `Should return HTTP 400 given trying to save author with id`() {
+        // Given
+        every { authorService.create(any()) }.throws(IllegalArgumentException())
+
+        // When
+        mockMvc.post(AUTHORS_BASE_URL) {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(anAuthorDto())
+        }.andExpect {
+            status { isBadRequest() }
+        }
     }
 
     @Test
@@ -91,7 +108,7 @@ class AuthorsControllerTest @Autowired constructor(
     @Test
     fun `Should return HTTP 404 given author NOT found on the database`() {
         // Given
-        val id = 1L;
+        val id = 1L
         every { authorService.getById(id) }.returns(null)
 
         // When
@@ -108,7 +125,7 @@ class AuthorsControllerTest @Autowired constructor(
     @Test
     fun `Should return HTTP 200 with author given author was found on the database`() {
         // Given
-        val id = 1L;
+        val id = 1L
         val expectedAuthor = anAuthorEntity(id)
         every { authorService.getById(id) }.returns(expectedAuthor)
 
@@ -122,5 +139,43 @@ class AuthorsControllerTest @Autowired constructor(
 
         // Then
         verify { authorService.getById(id) }
+    }
+
+    @Test
+    fun `Should return HTTP 404 given trying to update author NOT found on the database`() {
+        // Given
+        val id = 1L
+        every { authorService.fullUpdate(any(), any()) }.throws(IllegalStateException())
+
+        // When
+        mockMvc.put("$AUTHORS_BASE_URL/$id") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(anAuthorDto(id))
+        }.andExpect {
+            status { isNotFound() }
+        }
+    }
+
+    @Test
+    fun `Should return HTTP 200 given full update is successful`() {
+        // Given
+        val id = 1L
+        val inputAuthor = anAuthorDto(id)
+        val expectedAuthor = anAuthorEntity(id)
+        every { authorService.fullUpdate(id, inputAuthor.toAuthorEntity()) }.returns(expectedAuthor)
+
+        // When
+        mockMvc.put("$AUTHORS_BASE_URL/$id") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(anAuthorDto(id))
+        }.andExpect {
+            status { isOk() }
+            content { json(objectMapper.writeValueAsString(expectedAuthor)) }
+        }
+
+        // Then
+        verify { authorService.fullUpdate(id, inputAuthor.toAuthorEntity()) }
     }
 }
