@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
@@ -218,5 +219,22 @@ class AuthorsControllerTest @Autowired constructor(
 
         // Then
         verify { authorService.partialUpdate(id, inputAuthor.toAuthorUpdateRequest()) }
+    }
+
+    @Test
+    fun `Should return HTTP 204 given delete is successful`() {
+        // Given
+        val id = 1L
+        every { authorService.delete(id) }.returns(Unit)
+
+        // When
+        mockMvc.delete("$AUTHORS_BASE_URL/$id") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isNoContent() }
+        }
+
+        // Then
+        verify { authorService.delete(id) }
     }
 }

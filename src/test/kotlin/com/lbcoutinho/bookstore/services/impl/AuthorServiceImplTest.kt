@@ -144,6 +144,18 @@ class AuthorServiceImplTest @Autowired constructor(
         assertThat(retrievedAuthor).isEqualTo(updatedAuthor)
     }
 
+    @Test
+    fun `Should delete author`() {
+        // Given
+        val savedAuthor = authorRepository.save(anAuthorEntity())
+
+        // When
+        authorService.delete(savedAuthor.id!!)
+
+        // Then
+        assertThat(authorRepository.findByIdOrNull(savedAuthor.id)).isNull()
+    }
+
     companion object {
         @JvmStatic
         fun partialUpdateScenarios(): Stream<Arguments> {

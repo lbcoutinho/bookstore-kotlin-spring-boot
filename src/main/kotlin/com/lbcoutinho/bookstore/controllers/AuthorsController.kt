@@ -8,6 +8,7 @@ import com.lbcoutinho.bookstore.toAuthorEntity
 import com.lbcoutinho.bookstore.toAuthorUpdateRequest
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,9 +27,11 @@ class AuthorsController(private val authorService: AuthorService) {
     @ResponseStatus(CREATED)
     fun createAuthor(@RequestBody authorDto: AuthorDto): ResponseEntity<AuthorDto> {
         return try {
-            ResponseEntity.status(CREATED).body(authorService.create(
-                authorDto.toAuthorEntity()
-            ).toAuthorDto())
+            ResponseEntity.status(CREATED).body(
+                authorService.create(
+                    authorDto.toAuthorEntity()
+                ).toAuthorDto()
+            )
         } catch (e: IllegalArgumentException) {
             ResponseEntity.badRequest().build()
         }
@@ -45,27 +48,40 @@ class AuthorsController(private val authorService: AuthorService) {
     }
 
     @PutMapping("/{id}")
-    fun updateAuthor(@PathVariable("id") id: Long,
-                     @RequestBody authorDto: AuthorDto): ResponseEntity<AuthorDto> {
+    fun updateAuthor(
+        @PathVariable("id") id: Long,
+        @RequestBody authorDto: AuthorDto
+    ): ResponseEntity<AuthorDto> {
         return try {
-            ResponseEntity.ok(authorService.fullUpdate(
-                id, authorDto.toAuthorEntity()
-            ).toAuthorDto())
+            ResponseEntity.ok(
+                authorService.fullUpdate(
+                    id, authorDto.toAuthorEntity()
+                ).toAuthorDto()
+            )
         } catch (e: IllegalStateException) {
             ResponseEntity.notFound().build()
         }
     }
 
     @PatchMapping("/{id}")
-    fun partiallyUpdateAuthor(@PathVariable("id") id: Long,
-                     @RequestBody authorDto: AuthorUpdateRequestDto): ResponseEntity<AuthorDto> {
+    fun partiallyUpdateAuthor(
+        @PathVariable("id") id: Long,
+        @RequestBody authorDto: AuthorUpdateRequestDto
+    ): ResponseEntity<AuthorDto> {
         return try {
-            ResponseEntity.ok(authorService.partialUpdate(
-                id, authorDto.toAuthorUpdateRequest()
-            ).toAuthorDto())
+            ResponseEntity.ok(
+                authorService.partialUpdate(
+                    id, authorDto.toAuthorUpdateRequest()
+                ).toAuthorDto()
+            )
         } catch (e: IllegalStateException) {
             ResponseEntity.notFound().build()
         }
     }
 
+    @DeleteMapping("/{id}")
+    fun deleteAuthor(@PathVariable("id") id: Long): ResponseEntity<Unit> {
+        authorService.delete(id)
+        return ResponseEntity.noContent().build()
+    }
 }
