@@ -1,5 +1,6 @@
 package com.lbcoutinho.bookstore.services.impl
 
+import com.lbcoutinho.bookstore.domain.AuthorUpdateRequest
 import com.lbcoutinho.bookstore.domain.entities.AuthorEntity
 import com.lbcoutinho.bookstore.repositories.AuthorRepository
 import com.lbcoutinho.bookstore.services.AuthorService
@@ -28,5 +29,20 @@ class AuthorServiceImpl(private val authorRepository: AuthorRepository) : Author
         check(authorRepository.existsById(id))
         val normalizedAuthor = author.copy(id = id)
         return authorRepository.save(normalizedAuthor)
+    }
+
+    @Transactional
+    override fun partialUpdate(id: Long, authorUpdate: AuthorUpdateRequest): AuthorEntity {
+        val existingAuthor = authorRepository.findByIdOrNull(id)
+        checkNotNull(existingAuthor)
+
+        val updatedAuthor = existingAuthor.copy(
+            name = authorUpdate.name ?: existingAuthor.name,
+            age = authorUpdate.age ?: existingAuthor.age,
+            description = authorUpdate.description ?: existingAuthor.description,
+            image = authorUpdate.image ?: existingAuthor.image,
+        )
+
+        return authorRepository.save(updatedAuthor)
     }
 }

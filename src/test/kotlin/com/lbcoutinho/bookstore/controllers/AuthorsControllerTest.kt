@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.lbcoutinho.bookstore.domain.entities.AuthorEntity
 import com.lbcoutinho.bookstore.services.AuthorService
 import com.lbcoutinho.bookstore.toAuthorEntity
+import com.lbcoutinho.bookstore.toAuthorUpdateRequest
 import com.lbcoutinho.bookstore.util.anAuthorDto
 import com.lbcoutinho.bookstore.util.anAuthorEntity
+import com.lbcoutinho.bookstore.util.anAuthorUpdateRequestDto
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
@@ -16,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
 
@@ -162,20 +165,58 @@ class AuthorsControllerTest @Autowired constructor(
         // Given
         val id = 1L
         val inputAuthor = anAuthorDto(id)
-        val expectedAuthor = anAuthorEntity(id)
-        every { authorService.fullUpdate(id, inputAuthor.toAuthorEntity()) }.returns(expectedAuthor)
+        val updatedAuthor = anAuthorEntity(id)
+        every { authorService.fullUpdate(id, inputAuthor.toAuthorEntity()) }.returns(updatedAuthor)
 
         // When
         mockMvc.put("$AUTHORS_BASE_URL/$id") {
             contentType = MediaType.APPLICATION_JSON
             accept = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(anAuthorDto(id))
+            content = objectMapper.writeValueAsString(inputAuthor)
         }.andExpect {
             status { isOk() }
-            content { json(objectMapper.writeValueAsString(expectedAuthor)) }
+            content { json(objectMapper.writeValueAsString(updatedAuthor)) }
         }
 
         // Then
         verify { authorService.fullUpdate(id, inputAuthor.toAuthorEntity()) }
+    }
+
+    @Test
+    fun `Should return HTTP 404 given trying to partially update author NOT found on the database`() {
+        // Given
+        val id = 1L
+        every { authorService.partialUpdate(any(), any()) }.throws(IllegalStateException())
+
+        // When
+        mockMvc.patch("$AUTHORS_BASE_URL/$id") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(anAuthorDto(id))
+        }.andExpect {
+            status { isNotFound() }
+        }
+    }
+
+    @Test
+    fun `Should return HTTP 200 given partial update is successful`() {
+        // Given
+        val id = 1L
+        val inputAuthor = anAuthorUpdateRequestDto()
+        val updatedAuthor = anAuthorEntity(id)
+        every { authorService.partialUpdate(id, inputAuthor.toAuthorUpdateRequest()) }.returns(updatedAuthor)
+
+        // When
+        mockMvc.patch("$AUTHORS_BASE_URL/$id") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(inputAuthor)
+        }.andExpect {
+            status { isOk() }
+            content { json(objectMapper.writeValueAsString(updatedAuthor)) }
+        }
+
+        // Then
+        verify { authorService.partialUpdate(id, inputAuthor.toAuthorUpdateRequest()) }
     }
 }

@@ -1,15 +1,22 @@
 package com.lbcoutinho.bookstore.services.impl
 
+import com.lbcoutinho.bookstore.domain.AuthorUpdateRequest
 import com.lbcoutinho.bookstore.domain.entities.AuthorEntity
 import com.lbcoutinho.bookstore.repositories.AuthorRepository
 import com.lbcoutinho.bookstore.util.anAuthorEntity
+import com.lbcoutinho.bookstore.util.anAuthorUpdateRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
+import java.util.stream.Stream
 
 @SpringBootTest
 class AuthorServiceImplTest @Autowired constructor(
@@ -113,5 +120,56 @@ class AuthorServiceImplTest @Autowired constructor(
         assertThat(author).isEqualTo(updatedAuthor)
         val retrievedAuthor = authorRepository.findByIdOrNull(savedAuthor.id!!)
         assertThat(retrievedAuthor).isEqualTo(updatedAuthor)
+    }
+
+    @Test
+    fun `Should throw IllegalStateException given trying to partial update id not present on the database`() {
+        // When / Then
+        assertThrows<IllegalStateException> { authorService.partialUpdate(1, anAuthorUpdateRequest()) }
+    }
+
+    @ParameterizedTest
+    @MethodSource("partialUpdateScenarios")
+    fun `Should perform author partial update`(authorUpdateRequest: AuthorUpdateRequest,
+                                               updatedAuthor: AuthorEntity) {
+        // Given
+        val savedAuthor = authorRepository.save(anAuthorEntity())
+
+        // When
+        val author = authorService.partialUpdate(savedAuthor.id!!, authorUpdateRequest)
+
+        // Then
+        assertThat(author).isEqualTo(updatedAuthor)
+        val retrievedAuthor = authorRepository.findByIdOrNull(savedAuthor.id!!)
+        assertThat(retrievedAuthor).isEqualTo(updatedAuthor)
+    }
+
+    companion object {
+        @JvmStatic
+        fun partialUpdateScenarios(): Stream<Arguments> {
+            val authorEntity = anAuthorEntity()
+            return Stream.of(
+                arguments(
+                    AuthorUpdateRequest(name = "New name"),
+                    authorEntity.copy(id=1, name = "New name")
+                ),
+                arguments(
+                    AuthorUpdateRequest(description = "New description"),
+                    authorEntity.copy(id=2, description = "New description")
+                ),
+                arguments(
+                    AuthorUpdateRequest(age = 99),
+                    authorEntity.copy(id=3, age = 99)
+                ),
+                arguments(
+                    AuthorUpdateRequest(image = "New image"),
+                    authorEntity.copy(id=4, image = "New image")
+                ),
+                arguments(
+                    AuthorUpdateRequest(),
+                    authorEntity.copy(id=5)
+                ),
+            )
+        }
     }
 }
