@@ -5,8 +5,8 @@ import com.lbcoutinho.bookstore.domain.entities.AuthorEntity
 import com.lbcoutinho.bookstore.repositories.AuthorRepository
 import com.lbcoutinho.bookstore.util.anAuthorEntity
 import com.lbcoutinho.bookstore.util.anAuthorUpdateRequest
+import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -19,15 +19,11 @@ import org.springframework.data.repository.findByIdOrNull
 import java.util.stream.Stream
 
 @SpringBootTest
+@Transactional
 class AuthorServiceImplTest @Autowired constructor(
     private val authorService: AuthorServiceImpl,
     private val authorRepository: AuthorRepository
 ) {
-
-    @BeforeEach
-    fun setup() {
-        authorRepository.deleteAll()
-    }
 
     @Test
     fun `Should save new author to the database`() {
