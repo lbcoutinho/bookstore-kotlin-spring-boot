@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.put
 
 private const val BOOKS_BASE_URL = "/v1/books"
@@ -94,5 +95,24 @@ class BooksControllerTest @Autowired constructor(
 
         // Then
         verify { bookService.upsertBook(isbn, inputBook.toBookSummary()) }
+    }
+
+    @Test
+    fun `Should return HTTP 200 with books list`() {
+        // Given
+        val returnedBooks = listOf(aBookEntity(1), aBookEntity(2))
+        val expectedBooks = returnedBooks.map { it.toBookSummaryDto() }
+        every { bookService.getAllBooks() }.returns(returnedBooks)
+
+        // When
+        mockMvc.get(BOOKS_BASE_URL) {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { json(objectMapper.writeValueAsString(expectedBooks)) }
+        }
+
+        // Then
+        verify { bookService.getAllBooks() }
     }
 }

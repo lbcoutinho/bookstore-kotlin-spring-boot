@@ -7,6 +7,7 @@ import com.lbcoutinho.bookstore.toBookSummaryDto
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,5 +30,10 @@ class BooksController(private val bookService: BookService) {
         } catch (e: IllegalStateException) {
             return ResponseEntity.badRequest().build()
         }
+    }
+
+    @GetMapping
+    fun getAllBooks(): List<BookSummaryDto> {
+        return bookService.getAllBooks().map { it.toBookSummaryDto() }
     }
 }

@@ -75,4 +75,17 @@ class BookServiceImplTest @Autowired constructor(
         val queriedBook = bookRepository.findByIdOrNull(updatedBook.isbn)
         assertThat(queriedBook).isEqualTo(updatedBook)
     }
+
+    @Test
+    fun `Should return all books`() {
+        // Given
+        val savedAuthor1 = authorRepository.save(anAuthorEntity())
+        val savedBook1 = bookRepository.save(aBookEntity(savedAuthor1.id!!))
+
+        // When
+        val booksList = bookService.getAllBooks()
+
+        // Then
+        assertThat(booksList).containsExactlyInAnyOrder(savedBook1)
+    }
 }

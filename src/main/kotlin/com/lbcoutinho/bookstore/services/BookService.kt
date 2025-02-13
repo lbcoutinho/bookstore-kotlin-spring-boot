@@ -6,4 +6,6 @@ import com.lbcoutinho.bookstore.domain.entities.BookEntity
 interface BookService {
 
     fun upsertBook(isbn: String, book: BookSummary): Pair<BookEntity, Boolean>
+
+    fun getAllBooks(): List<BookEntity>
 }
