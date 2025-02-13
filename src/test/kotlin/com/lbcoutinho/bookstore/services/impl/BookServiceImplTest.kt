@@ -80,7 +80,7 @@ class BookServiceImplTest @Autowired constructor(
     @Test
     fun `Should return empty list of books given no books on the database`() {
         // When
-        val booksList = bookService.getAllBooks(null)
+        val booksList = bookService.getAllBooks()
 
         // Then
         assertThat(booksList).isEmpty()
@@ -94,7 +94,7 @@ class BookServiceImplTest @Autowired constructor(
         val savedBook2 = bookRepository.save(aBookEntity(ISBN_2, savedAuthor1.id!!))
 
         // When
-        val booksList = bookService.getAllBooks(null)
+        val booksList = bookService.getAllBooks()
 
         // Then
         assertThat(booksList).containsExactlyInAnyOrder(savedBook1, savedBook2)

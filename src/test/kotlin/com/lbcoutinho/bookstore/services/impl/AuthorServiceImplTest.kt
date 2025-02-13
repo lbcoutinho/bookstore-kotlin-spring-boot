@@ -36,10 +36,12 @@ class AuthorServiceImplTest @Autowired constructor(
         // Then
         assertThat(savedAuthor.id).isNotNull()
 
-        val queriedAuthor = authorRepository.findByIdOrNull(savedAuthor.id!!)
-        assertThat(queriedAuthor).isNotNull()
+        val retrievedAuthor = authorRepository.findByIdOrNull(savedAuthor.id!!)
+        assertThat(retrievedAuthor).isNotNull()
 
-        assertThat(queriedAuthor).isEqualTo(anAuthorEntity(savedAuthor.id))
+        assertThat(retrievedAuthor)
+            .usingRecursiveComparison()
+            .isEqualTo(anAuthorEntity(savedAuthor.id))
     }
 
     @Test
@@ -135,9 +137,9 @@ class AuthorServiceImplTest @Autowired constructor(
         val author = authorService.partialUpdate(savedAuthor.id!!, authorUpdateRequest)
 
         // Then
-        assertThat(author).isEqualTo(updatedAuthor)
+        assertThat(author).usingRecursiveComparison().isEqualTo(updatedAuthor)
         val retrievedAuthor = authorRepository.findByIdOrNull(savedAuthor.id!!)
-        assertThat(retrievedAuthor).isEqualTo(updatedAuthor)
+        assertThat(retrievedAuthor).usingRecursiveComparison().isEqualTo(updatedAuthor)
     }
 
     @Test

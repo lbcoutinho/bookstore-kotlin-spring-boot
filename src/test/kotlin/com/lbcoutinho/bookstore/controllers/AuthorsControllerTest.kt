@@ -3,6 +3,7 @@ package com.lbcoutinho.bookstore.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.lbcoutinho.bookstore.domain.entities.AuthorEntity
 import com.lbcoutinho.bookstore.services.AuthorService
+import com.lbcoutinho.bookstore.toAuthorDto
 import com.lbcoutinho.bookstore.toAuthorEntity
 import com.lbcoutinho.bookstore.toAuthorUpdateRequest
 import com.lbcoutinho.bookstore.util.anAuthorDto
@@ -95,6 +96,7 @@ class AuthorsControllerTest @Autowired constructor(
     fun `Should return HTTP 200 with authors list given database has authors saved`() {
         // Given
         val authorsList = listOf(anAuthorEntity(1), anAuthorEntity(2))
+        val expectedAuthorsList = authorsList.map { it.toAuthorDto() }
         every { authorService.getAll() }.returns(authorsList)
 
         // When
@@ -102,7 +104,7 @@ class AuthorsControllerTest @Autowired constructor(
             accept = MediaType.APPLICATION_JSON
         }.andExpect {
             status { isOk() }
-            content { json(objectMapper.writeValueAsString(authorsList)) }
+            content { json(objectMapper.writeValueAsString(expectedAuthorsList)) }
         }
 
         // Then
@@ -138,7 +140,7 @@ class AuthorsControllerTest @Autowired constructor(
             accept = MediaType.APPLICATION_JSON
         }.andExpect {
             status { isOk() }
-            content { json(objectMapper.writeValueAsString(expectedAuthor)) }
+            content { json(objectMapper.writeValueAsString(expectedAuthor.toAuthorDto())) }
         }
 
         // Then
@@ -176,7 +178,7 @@ class AuthorsControllerTest @Autowired constructor(
             content = objectMapper.writeValueAsString(inputAuthor)
         }.andExpect {
             status { isOk() }
-            content { json(objectMapper.writeValueAsString(updatedAuthor)) }
+            content { json(objectMapper.writeValueAsString(updatedAuthor.toAuthorDto())) }
         }
 
         // Then
@@ -214,7 +216,7 @@ class AuthorsControllerTest @Autowired constructor(
             content = objectMapper.writeValueAsString(inputAuthor)
         }.andExpect {
             status { isOk() }
-            content { json(objectMapper.writeValueAsString(updatedAuthor)) }
+            content { json(objectMapper.writeValueAsString(updatedAuthor.toAuthorDto())) }
         }
 
         // Then

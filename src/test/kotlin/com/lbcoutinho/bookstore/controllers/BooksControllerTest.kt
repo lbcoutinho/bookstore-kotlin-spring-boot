@@ -102,7 +102,7 @@ class BooksControllerTest @Autowired constructor(
         // Given
         val returnedBooks = listOf(aBookEntity(1), aBookEntity(2))
         val expectedBooks = returnedBooks.map { it.toBookSummaryDto() }
-        every { bookService.getAllBooks(null) }.returns(returnedBooks)
+        every { bookService.getAllBooks() }.returns(returnedBooks)
 
         // When
         mockMvc.get(BOOKS_BASE_URL) {
@@ -113,7 +113,7 @@ class BooksControllerTest @Autowired constructor(
         }
 
         // Then
-        verify { bookService.getAllBooks(null) }
+        verify { bookService.getAllBooks() }
     }
 
     @Test
