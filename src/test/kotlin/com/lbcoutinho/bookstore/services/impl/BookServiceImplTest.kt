@@ -6,7 +6,8 @@ import com.lbcoutinho.bookstore.repositories.AuthorRepository
 import com.lbcoutinho.bookstore.repositories.BookRepository
 import com.lbcoutinho.bookstore.services.BookService
 import com.lbcoutinho.bookstore.toBookEntity
-import com.lbcoutinho.bookstore.util.ISBN
+import com.lbcoutinho.bookstore.util.ISBN_1
+import com.lbcoutinho.bookstore.util.ISBN_2
 import com.lbcoutinho.bookstore.util.aBookEntity
 import com.lbcoutinho.bookstore.util.aBookSummary
 import com.lbcoutinho.bookstore.util.anAuthorEntity
@@ -31,7 +32,7 @@ class BookServiceImplTest @Autowired constructor(
         // Given
         val authorId = 1L
         // When / Then
-        assertThrows<IllegalStateException> { bookService.upsertBook(ISBN, aBookSummary(authorId)) }
+        assertThrows<IllegalStateException> { bookService.upsertBook(ISBN_1, aBookSummary(authorId)) }
     }
 
     @Test
@@ -41,7 +42,7 @@ class BookServiceImplTest @Autowired constructor(
         val inputBook = aBookSummary(savedAuthor.id!!)
 
         // When
-        val (createdBook, isCreated) = bookService.upsertBook(ISBN, inputBook)
+        val (createdBook, isCreated) = bookService.upsertBook(ISBN_1, inputBook)
 
         // Then
         assertThat(isCreated).isTrue()
@@ -66,7 +67,7 @@ class BookServiceImplTest @Autowired constructor(
         )
 
         // When
-        val (updatedBook, isCreated) = bookService.upsertBook(ISBN, inputBook)
+        val (updatedBook, isCreated) = bookService.upsertBook(ISBN_1, inputBook)
 
         // Then
         assertThat(isCreated).isFalse()
@@ -77,13 +78,49 @@ class BookServiceImplTest @Autowired constructor(
     }
 
     @Test
+    fun `Should return empty list of books given no books on the database`() {
+        // When
+        val booksList = bookService.getAllBooks(null)
+
+        // Then
+        assertThat(booksList).isEmpty()
+    }
+
+    @Test
     fun `Should return all books`() {
         // Given
         val savedAuthor1 = authorRepository.save(anAuthorEntity())
-        val savedBook1 = bookRepository.save(aBookEntity(savedAuthor1.id!!))
+        val savedBook1 = bookRepository.save(aBookEntity(ISBN_1,savedAuthor1.id!!))
+        val savedBook2 = bookRepository.save(aBookEntity(ISBN_2, savedAuthor1.id!!))
 
         // When
-        val booksList = bookService.getAllBooks()
+        val booksList = bookService.getAllBooks(null)
+
+        // Then
+        assertThat(booksList).containsExactlyInAnyOrder(savedBook1, savedBook2)
+    }
+
+    @Test
+    fun `Should return empty list of books given author does not have books on the database`() {
+        // When
+        val authorId = 1L
+        val booksList = bookService.getAllBooks(authorId)
+
+        // Then
+        assertThat(booksList).isEmpty()
+    }
+
+    @Test
+    fun `Should return all books for given author id`() {
+        // Given
+        val savedAuthor1 = authorRepository.save(anAuthorEntity())
+        val authorId = savedAuthor1.id!!
+        val savedBook1 = bookRepository.save(aBookEntity(ISBN_1, authorId))
+        val savedAuthor2 = authorRepository.save(anAuthorEntity())
+        bookRepository.save(aBookEntity(ISBN_2, savedAuthor2.id!!))
+
+        // When
+        val booksList = bookService.getAllBooks(authorId)
 
         // Then
         assertThat(booksList).containsExactlyInAnyOrder(savedBook1)

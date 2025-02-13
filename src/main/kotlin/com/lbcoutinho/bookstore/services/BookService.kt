@@ -7,5 +7,5 @@ interface BookService {
 
     fun upsertBook(isbn: String, book: BookSummary): Pair<BookEntity, Boolean>
 
-    fun getAllBooks(): List<BookEntity>
+    fun getAllBooks(authorId: Long?): List<BookEntity>
 }

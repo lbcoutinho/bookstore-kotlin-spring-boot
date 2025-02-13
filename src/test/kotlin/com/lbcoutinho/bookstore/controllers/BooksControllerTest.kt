@@ -98,11 +98,11 @@ class BooksControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `Should return HTTP 200 with books list`() {
+    fun `Should return HTTP 200 with all books list`() {
         // Given
         val returnedBooks = listOf(aBookEntity(1), aBookEntity(2))
         val expectedBooks = returnedBooks.map { it.toBookSummaryDto() }
-        every { bookService.getAllBooks() }.returns(returnedBooks)
+        every { bookService.getAllBooks(null) }.returns(returnedBooks)
 
         // When
         mockMvc.get(BOOKS_BASE_URL) {
@@ -113,6 +113,26 @@ class BooksControllerTest @Autowired constructor(
         }
 
         // Then
-        verify { bookService.getAllBooks() }
+        verify { bookService.getAllBooks(null) }
+    }
+
+    @Test
+    fun `Should return HTTP 200 with author's books list`() {
+        // Given
+        val authorId = 1L
+        val returnedBooks = listOf(aBookEntity(authorId), aBookEntity(authorId))
+        val expectedBooks = returnedBooks.map { it.toBookSummaryDto() }
+        every { bookService.getAllBooks(authorId) }.returns(returnedBooks)
+
+        // When
+        mockMvc.get("$BOOKS_BASE_URL?author=$authorId") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { json(objectMapper.writeValueAsString(expectedBooks)) }
+        }
+
+        // Then
+        verify { bookService.getAllBooks(authorId) }
     }
 }
