@@ -125,4 +125,26 @@ class BookServiceImplTest @Autowired constructor(
         // Then
         assertThat(booksList).containsExactlyInAnyOrder(savedBook1)
     }
+
+    @Test
+    fun `Should nullable given book was not found on database`() {
+        // When
+        val book = bookService.getBook(ISBN_1)
+
+        // Then
+        assertThat(book).isNull()
+    }
+
+    @Test
+    fun `Should return book`() {
+        // Given
+        val savedAuthor1 = authorRepository.save(anAuthorEntity())
+        val savedBook1 = bookRepository.save(aBookEntity(ISBN_1, savedAuthor1.id!!))
+
+        // When
+        val book = bookService.getBook(ISBN_1)
+
+        // Then
+        assertThat(book).isEqualTo(savedBook1)
+    }
 }

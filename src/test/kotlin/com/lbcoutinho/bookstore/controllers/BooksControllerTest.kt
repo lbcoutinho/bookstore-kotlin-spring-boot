@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.lbcoutinho.bookstore.services.BookService
 import com.lbcoutinho.bookstore.toBookSummary
 import com.lbcoutinho.bookstore.toBookSummaryDto
+import com.lbcoutinho.bookstore.util.ISBN_1
 import com.lbcoutinho.bookstore.util.aBookEntity
 import com.lbcoutinho.bookstore.util.aBookSummaryDto
 import com.ninjasquad.springmockk.MockkBean
@@ -134,5 +135,39 @@ class BooksControllerTest @Autowired constructor(
 
         // Then
         verify { bookService.getAllBooks(authorId) }
+    }
+
+    @Test
+    fun `Should return HTTP 404 given book id not found`() {
+        // Given
+        every { bookService.getBook(ISBN_1) }.returns(null)
+
+        // When
+        mockMvc.get("$BOOKS_BASE_URL/$ISBN_1") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isNotFound() }
+        }
+
+        // Then
+        verify { bookService.getBook(ISBN_1) }
+    }
+
+    @Test
+    fun `Should return HTTP 200 given book was found`() {
+        // Given
+        val returnedBook = aBookEntity(1L)
+        every { bookService.getBook(ISBN_1) }.returns(returnedBook)
+
+        // When
+        mockMvc.get("$BOOKS_BASE_URL/$ISBN_1") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { objectMapper.writeValueAsString(returnedBook.toBookSummaryDto()) }
+        }
+
+        // Then
+        verify { bookService.getBook(ISBN_1) }
     }
 }

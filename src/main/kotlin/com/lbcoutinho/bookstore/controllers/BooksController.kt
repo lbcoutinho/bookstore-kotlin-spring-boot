@@ -34,7 +34,12 @@ class BooksController(private val bookService: BookService) {
     }
 
     @GetMapping
-    fun getAllBooks(@RequestParam("author") authorId : Long?): List<BookSummaryDto> {
+    fun getAllBooks(@RequestParam("author") authorId: Long?): List<BookSummaryDto> {
         return bookService.getAllBooks(authorId).map { it.toBookSummaryDto() }
+    }
+
+    @GetMapping("/{isbn}")
+    fun getBook(@PathVariable("isbn") isbn: String): ResponseEntity<BookSummaryDto> {
+        return ResponseEntity.ofNullable(bookService.getBook(isbn)?.toBookSummaryDto())
     }
 }
