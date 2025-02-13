@@ -1,9 +1,11 @@
 package com.lbcoutinho.bookstore.domain.entities
 
+import jakarta.persistence.CascadeType.REMOVE
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType.IDENTITY
 import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 
 @Entity
@@ -15,5 +17,7 @@ data class AuthorEntity(
     val name: String,
     val age: Int,
     val description: String,
-    val image: String
+    val image: String,
+    @OneToMany(mappedBy = "author", cascade = [REMOVE])
+    val books: List<BookEntity> = emptyList()
 )
